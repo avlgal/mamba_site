@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Продажа ключей для игр</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('images/background.jpg') no-repeat center center fixed; /* Добавьте ваш путь к изображению */
+            background-size: cover; /* Масштабирует фон, чтобы он покрывал весь экран */
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачная белая плашка */
+            margin: 20px auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            position: relative;
+        }
+
+        header img {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 50px;
+        }
+
+        #cartButton {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .sidebar {
+            width: 200px;
+            padding: 20px;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: column;
+            border-radius: 10px;
+        }
+
+        .filter-container {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-container label {
+            margin-bottom: 5px;
+        }
+
+        .filter-container input,
+        .filter-container select {
+            padding: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .products-container {
+            flex: 1;
+            margin-left: 20px;
+        }
+
+        .product {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 10px;
+            background-color: #fff;
+        }
+
+        .product h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            flex: 1;
+        }
+
+        .product-details {
+            flex: 2;
+        }
+
+        .product button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .product button:hover {
+            background-color: #45a049;
+        }
+
+        .product .remove {
+            background-color: #f44336;
+        }
+
+        .product .remove:hover {
+            background-color: #e41e1e;
+        }
+
+        /* Стили для всплывающего окна */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .popup h3 {
+            margin-top: 0;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+
+        /* Стили для выдвигающейся корзины */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: #f2f2f2;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            transition: right 0.3s;
+            padding: 20px;
+        }
+
+        .cart-sidebar.open {
+            right: 0;
+        }
+
+        .cart-sidebar .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-sidebar .cart-header h2 {
+            margin: 0;
+        }
+
+        .cart-total {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <header>
+            <img src="images/logo.png" alt="Logo">
+            <h1>Продажа ключей для игр</h1>
+            <button class="btn btn-primary" id="cartButton">Корзина</button>
+            <a href="./prototypecoin.html" class="btn btn-secondary">Купить валюту</a>
+        </header>
+        <div class="container">
+            <div class="sidebar">
+                <div class="filter-container">
+                    <label for="search">Поиск:</label>
+                    <input type="text" id="search" onkeyup="filterProducts()" placeholder="Введите название игры...">
+                </div>
+                <div class="filter-container">
+                    <label for="category">Категория:</label>
+                    <select id="category" onchange="filterProducts()">
+                        <option value="">Все</option>
+                        <option value="action">Экшен</option>
+                        <option value="adventure">Приключения</option>
+                        <option value="strategy">Стратегии</option>
+                    </select>
+                </div>
+                <div class="filter-container">
+                    <label for="price">Цена:</label>
+                    <input type="number" id="price" min="0" step="1" oninput="filterProducts()">
+                </div>
+            </div>
+            <div class="products-container">
+                <div id="products">
+                    <!-- Здесь будут отображаться продукты -->
+                </div>
+            </div>
+        </div>
+
+        <div class="cart-sidebar" id="cartSidebar">
+            <div class="cart-header">
+                <h2>Корзина</h2>
+                <button class="btn btn-secondary" id="closeCartButton">Закрыть</button>
+            </div>
+            <div id="cartItems">
+                <!-- Здесь будут отображаться товары в корзине -->
+            </div>
+            <div class="cart-total" id="cartTotal">Итого: $0</div>
+        </div>
+
+        <!-- Всплывающее окно для ввода данных карты -->
+        <div class="overlay" id="paymentOverlay">
+            <div class="popup">
+                <span class="close" onclick="closePaymentPopup()">&times;</span>
+                <h3>Введите данные карты</h3>
+                <form id="paymentForm">
+                    <div class="form-group">
+                        <label for="cardNumber">Номер карты</label>
+                        <input type="text" id="cardNumber" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cardExpiry">Срок действия (MM/YY)</label>
+                        <input type="text" id="cardExpiry" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cardCVC">CVC</label>
+                        <input type="text" id="cardCVC" class="form-control" required>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="processPayment()">Оплатить</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Всплывающее окно с поздравлением -->
+        <div class="overlay" id="congratulationsOverlay">
+            <div class="popup">
+                <span class="close" onclick="closeCongratulationsPopup()">&times;</span>
+                <h3>Поздравляем! Вы купили игру!</h3>
+                <p>Ключ игры: <span id="gameKey"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const productsContainer = document.getElementById('products');
+            const cartItemsContainer = document.getElementById('cartItems');
+            const cartTotalElement = document.getElementById('cartTotal');
+            const cartButton = document.getElementById('cartButton');
+            const closeCartButton = document.getElementById('closeCartButton');
+            const cartSidebar = document.getElementById('cartSidebar');
+            const paymentOverlay = document.getElementById('paymentOverlay');
+            const congratulationsOverlay = document.getElementById('congratulationsOverlay');
+            const gameKeyElement = document.getElementById('gameKey');
+
+            const products = [
+                { name: 'Minecraft', chast: '', category: 'adventure', price: 10, key: 'HDGFDJ434FHHF' },
+                { name: 'GTAV', chast: '', category: 'action', price: 40, key: 'FDDG43535FDHGGH' },
+                { name: 'GTAVI', chast: '',  category: 'action', price: 14, key: 'HDGDGJJH6475HHFG' },
+                { name: 'GTAIV', chast: '', category: 'action', price: 80, key: 'HFHNELSJ1356JFHSB' },
+                { name: 'Cyberpunk', chast: '', category: 'adventure', price: 30, key: 'GFHEJSN54744HDNBR' },
+                //{ name: 'Witcher', chast: '3', category: 'adventure', price: 18, key: 'HEPJDIR85628IEYUR' },
+                { name: 'Witcher', chast: 'Wild Hunt', category: 'adventure', price: 110, key: 'HRNSNMCLSJD3345HDH' },
+                //{ name: 'Witcher 2', category: 'adventure', price: 145, key: 'H546456HFFJJF77766H' },
+                //{ name: 'Witcher', category: 'adventure', price: 220, key: 'HGJJDJJDGHI789' },
+                { name: 'AmongUs', chast: '', category: 'strategy', price: 55, key: 'IFJDJKSNJFH747484' },
+                { name: 'Scrap_Mechanic', chast: '', category: 'strategy', price: 70, key: 'FHDNSJDJD575HFGJ' },
+                { name: 'Team_Fortress_2', chast: '', category: 'strategy', price: 12, key: 'FJSJIEJHED574HDD' },
+                //{ name: 'RimWorld', category: 'strategy', price: 19, key: 'KHHDHR746FJDF775' },
+                //{ name: 'Totally Accurate Battle Simulator', category: 'strategy', price: 25, key: 'KHFH756RJDKJF939HH' },
+                //{ name: 'Dark Souls 3', category: 'adventure', price: 111, key: 'GHFJFDJSKLL797899H' },
+                //{ name: 'Dark Souls 2', category: 'adventure', price: 90, key: 'FJIOSHA346JF66KF' },
+                //{ name: 'Hello neighbour 2', category: 'adventure', price: 150, key: 'JFJHNAJDJFOOTJ4847JG' }
+            ];
+
+            const cart = {};
+
+            function renderProducts(productsList) {
+                productsContainer.innerHTML = '';
+                productsList.forEach(product => {
+                    const productDiv = document.createElement('div');
+                    productDiv.classList.add('product');
+                    productDiv.innerHTML = `
+                        <div class="product-details">
+                            <h2>${product.name}</h2>
+                            <h2>${product.chast}</h2>
+                            <p>Категория: ${product.category}</p>
+                            <p>Цена: $${product.price}</p>
+                        </div>
+                        <div class="product-image">
+                            <img src="${getImageUrl(product.name)}" alt="${product.name}">
+                        </div>
+                        <div class="product-actions">
+                            <button onclick="addToCart('${product.name}')">+</button>
+                            <span id="quantity-${product.name}">0</span>
+                            <button class="remove" onclick="removeFromCart('${product.name}')">-</button>
+                            <button class="buy" onclick="buy('${product.name}', ${product.price}, '${product.key}')">Купить</button>
+                        </div>
+                    `;
+                    productsContainer.appendChild(productDiv);
+                });
+            }
+
+            function getImageUrl(productName) {
+                return `images/${productName.toLowerCase().replace(/\s+/g, '-')}.jpg`;
+            }
+
+            renderProducts(products);
+
+            function renderCart() {
+                cartItemsContainer.innerHTML = '';
+                let total = 0;
+                for (const [productName, productDetails] of Object.entries(cart)) {
+                    const cartItemDiv = document.createElement('div');
+                    cartItemDiv.classList.add('cart-item');
+                    cartItemDiv.innerHTML = `
+                        <span>${productName}</span>
+                        <span>${productDetails.quantity} шт.</span>
+                        <span>$${productDetails.price * productDetails.quantity}</span>
+                        <div>
+                            <button onclick="addToCart('${productName}')">+</button>
+                            <span id="cart-quantity-${productName}">${productDetails.quantity}</span>
+                            <button class="remove" onclick="removeFromCart('${productName}')">-</button>
+                        </div>
+                        <button class="buy" onclick="buy('${productName}', ${productDetails.price}, '${productDetails.key}')">Купить</button>
+                    `;
+                    cartItemsContainer.appendChild(cartItemDiv);
+                    total += productDetails.price * productDetails.quantity;
+                }
+                cartTotalElement.innerText = `Итого: $${total}`;
+            }
+
+            window.addToCart = function(productName) {
+                const product = products.find(p => p.name === productName);
+                if (cart[productName]) {
+                    cart[productName].quantity += 1;
+                } else {
+                    cart[productName] = { ...product, quantity: 1 };
+                }
+                document.getElementById(`quantity-${productName}`).innerText = cart[productName].quantity;
+                if (document.getElementById(`cart-quantity-${productName}`)) {
+                    document.getElementById(`cart-quantity-${productName}`).innerText = cart[productName].quantity;
+                }
+                renderCart();
+            };
+
+            window.removeFromCart = function(productName) {
+                if (cart[productName]) {
+                    cart[productName].quantity -= 1;
+                    if (cart[productName].quantity <= 0) {
+                        delete cart[productName];
+                    }
+                }
+                document.getElementById(`quantity-${productName}`).innerText = cart[productName] ? cart[productName].quantity : 0;
+                if (document.getElementById(`cart-quantity-${productName}`)) {
+                    document.getElementById(`cart-quantity-${productName}`).innerText = cart[productName] ? cart[productName].quantity : 0;
+                }
+                renderCart();
+            };
+
+            window.buy = function(name, price, key) {
+                // Показать окно ввода данных карты
+                paymentOverlay.style.display = 'flex';
+
+                // Сохранить данные о покупке
+                paymentOverlay.dataset.productName = name;
+                paymentOverlay.dataset.productKey = key;
+            };
+
+            window.processPayment = function() {
+                // Здесь должна быть логика обработки данных карты
+
+                // Закрыть окно ввода данных карты и показать окно с поздравлением
+                paymentOverlay.style.display = 'none';
+                gameKeyElement.innerText = paymentOverlay.dataset.productKey;
+                congratulationsOverlay.style.display = 'flex';
+            };
+
+            window.closePaymentPopup = function() {
+                paymentOverlay.style.display = 'none';
+            };
+
+            window.closeCongratulationsPopup = function() {
+                congratulationsOverlay.style.display = 'none';
+            };
+
+            window.filterProducts = function() {
+                const searchValue = document.getElementById('search').value.toLowerCase();
+                const categoryValue = document.getElementById('category').value.toLowerCase();
+                const priceValue = parseInt(document.getElementById('price').value);
+                const filteredProducts = products.filter(product => {
+                    const matchesSearch = product.name.toLowerCase().includes(searchValue);
+                    const matchesCategory = categoryValue === '' || product.category.toLowerCase() === categoryValue;
+                    const matchesPrice = isNaN(priceValue) || product.price <= priceValue;
+                    return matchesSearch && matchesCategory && matchesPrice;
+                });
+                renderProducts(filteredProducts);
+            };
+
+            cartButton.addEventListener('click', function() {
+                cartSidebar.classList.toggle('open');
+            });
+
+            closeCartButton.addEventListener('click', function() {
+                cartSidebar.classList.remove('open');
+            });
+        });
+    </script>
+</body>
+</html>
